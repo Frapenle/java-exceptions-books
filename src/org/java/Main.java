@@ -1,5 +1,6 @@
 package org.java;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.Scanner;
 
@@ -14,8 +15,6 @@ public class Main {
 	private static void printBooksToFile() {
 		int numOfBooks;
 		int counter = 0;
-		int option = -1;
-		boolean errCatch = false;
 		
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Quanti libri vuoi inserire?");
@@ -23,8 +22,10 @@ public class Main {
 		sc.nextLine();
 		
 		Book[] books = new Book[numOfBooks];
-		while(counter < numOfBooks && !errCatch) {
+		
+		while(counter < numOfBooks) {
 			
+			try {
 			System.out.println("Titolo: ");
 			String title = sc.nextLine();
 			
@@ -38,29 +39,39 @@ public class Main {
 			System.out.println("Publisher: ");
 			String publisher = sc.nextLine();		
 			
-			try {
 				Book book = new Book(title, pageNumbers, author, publisher);
 				books[counter++] = book;
 			} catch (Exception e) {
+				counter--;
 				System.out.println("Errore... " + e.getMessage());
-				errCatch = true;
 			}
 		}
 		sc.close();
 		
 //		write to books.txt
 		try (FileWriter myWriter = new FileWriter(FILEPATH)) {
-		// creo un oggetto FileWriter
-			for(int i = 0; i < books.length; i++) {
-				// scrivo una stringa
-				myWriter.write(books[i].toString()
+			for(Book book : books) {
+				myWriter.write(book.toString()
 						+ "\n --------------- \n");
 			}
-			// chiudo il FileWriter
-			myWriter.close();
 		} catch (Exception e) {
 			System.out.println("Errore durante la scrittura nel file: "
 								+ FILEPATH + " " + e.getMessage());
 		}
+		
+		try {
+			File mioFile = new File(FILEPATH);
+			// creo un oggetto Scanner passandogli il File
+			Scanner reader = new Scanner(mioFile);
+			// leggo riga per riga
+			while (reader.hasNextLine()) {
+				String data = reader.nextLine();
+				System.out.print(data);
+			}
+			// chiudo lo Scanner
+			reader.close();
+			} catch (Exception e) {
+				System.err.println("Errore durante la lettura: " + e.getMessage());
+			}
 	}
 }
